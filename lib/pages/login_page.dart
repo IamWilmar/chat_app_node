@@ -1,8 +1,11 @@
+import 'package:chat_app_node/helpers/mostrar_alerta.dart';
+import 'package:chat_app_node/services/auth_service.dart';
 import 'package:chat_app_node/widgets/boton_azul.dart';
 import 'package:flutter/material.dart';
 import 'package:chat_app_node/widgets/custom_input.dart';
 import 'package:chat_app_node/widgets/labels.dart';
 import 'package:chat_app_node/widgets/logo.dart';
+import 'package:provider/provider.dart';
 
 //https://www.flaticon.com/authors/pixel-perfect
 
@@ -14,13 +17,16 @@ class LogInPage extends StatelessWidget {
         body: SingleChildScrollView(
           physics: BouncingScrollPhysics(),
           child: Container(
-            height: MediaQuery.of(context).size.height*0.95,
+            height: MediaQuery.of(context).size.height * 0.95,
             child: Column(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
                 Logo(),
                 _Form(),
-                Labels(route: 'register', titulo: '¿No tienes Cuenta?', subTitulo: 'Crea una ahora'),
+                Labels(
+                    route: 'register',
+                    titulo: '¿No tienes Cuenta?',
+                    subTitulo: 'Crea una ahora'),
                 Text(
                   'Terminos y condiciones de uso',
                   style: TextStyle(
@@ -46,6 +52,7 @@ class __FormState extends State<_Form> {
   final passController = TextEditingController();
   @override
   Widget build(BuildContext context) {
+    final authService = Provider.of<AuthService>(context);
     return Container(
       margin: EdgeInsets.only(top: 40),
       padding: EdgeInsets.symmetric(horizontal: 30.0),
@@ -66,9 +73,17 @@ class __FormState extends State<_Form> {
           ),
           BlueButton(
             text: 'Log In',
-            onPressed: () {
-              print(emailController.text);
-              print(passController.text);
+            onPressed:  authService.autenticando ? null : () async {
+              FocusScope.of(context).unfocus();
+              final isloginOk = await authService.login(emailController.text.trim(), passController.text.trim());
+              if(isloginOk){
+                //TODO: Conectar a sokcet server
+                //TODO: Navegar a otra pantalla
+                Navigator.pushReplacementNamed(context, 'users');
+              }else{
+                //Mostrar alerta
+                mostrarAlerta(context, 'Login Incorrecto', 'Credenciales no validas');
+              }
             },
           ),
         ],

@@ -1,8 +1,11 @@
-import 'package:chat_app_node/widgets/boton_azul.dart';
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
+import 'package:chat_app_node/services/auth_service.dart';
+import 'package:chat_app_node/widgets/boton_azul.dart';
 import 'package:chat_app_node/widgets/custom_input.dart';
 import 'package:chat_app_node/widgets/labels.dart';
 import 'package:chat_app_node/widgets/logo.dart';
+import 'package:chat_app_node/helpers/mostrar_alerta.dart';
 
 //https://www.flaticon.com/authors/pixel-perfect
 
@@ -47,6 +50,7 @@ class __FormState extends State<_Form> {
   final userNameController = TextEditingController(); 
   @override
   Widget build(BuildContext context) {
+    final authService = Provider.of<AuthService>(context);
     return Container(
       margin: EdgeInsets.only(top: 28),
       padding: EdgeInsets.symmetric(horizontal: 30.0),
@@ -73,9 +77,17 @@ class __FormState extends State<_Form> {
           ),
           BlueButton(
             text: 'Log In',
-            onPressed: () {
-              print(emailController.text);
-              print(passController.text);
+            onPressed: authService.autenticando ? null : () async {
+               FocusScope.of(context).unfocus();
+              final isloginOk = await authService.register(userNameController.text, emailController.text.trim(), passController.text.trim());
+              if(isloginOk){
+                //TODO: Conectar a sokcet server
+                //TODO: Navegar a otra pantalla
+                Navigator.pushReplacementNamed(context, 'users');
+              }else{
+                //Mostrar alerta
+                mostrarAlerta(context, 'Registro Incorrecto', 'Credenciales no validas');
+              }
             },
           ),
         ],
