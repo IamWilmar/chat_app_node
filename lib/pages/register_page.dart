@@ -1,3 +1,4 @@
+import 'package:chat_app_node/services/socket_service.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:chat_app_node/services/auth_service.dart';
@@ -51,6 +52,7 @@ class __FormState extends State<_Form> {
   @override
   Widget build(BuildContext context) {
     final authService = Provider.of<AuthService>(context);
+    final socketService = Provider.of<SocketService>(context);
     return Container(
       margin: EdgeInsets.only(top: 28),
       padding: EdgeInsets.symmetric(horizontal: 30.0),
@@ -81,8 +83,9 @@ class __FormState extends State<_Form> {
                FocusScope.of(context).unfocus();
               final isloginOk = await authService.register(userNameController.text, emailController.text.trim(), passController.text.trim());
               if(isloginOk){
-                //TODO: Conectar a sokcet server
-                //TODO: Navegar a otra pantalla
+                //Conectar a sokcet server
+                socketService.connect();
+                //Navegar a otra pantalla
                 Navigator.pushReplacementNamed(context, 'users');
               }else{
                 //Mostrar alerta
